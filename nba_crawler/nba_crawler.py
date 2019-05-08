@@ -3,17 +3,17 @@ import requests
 import os
 import pymysql
 from time import strptime
+from datetime import datetime
 import mysql_secret
 import News
 
 
-headers = {"user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
-              }
+headers = {"user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"}
 
 base_url = "https://nba.udn.com"
 index_url = "nba/index?gr=www"
 
-url = os.path.join(base_url,index_url)
+url = os.path.join(base_url, index_url)
 # print(url)
 
 def get_news_urls():
@@ -46,8 +46,8 @@ def check_uncrawled_news_urls(news_urls_list):
         if news_url not in query_result_urls_list:
             uncrawled_news_urls_list.append(news_url)
         else:
-            print("%"*20)
-            print("inside check_uncrawled_news_urls:")
+            # print("+"*20)
+            # print("inside check_uncrawled_news_urls:")
             print(news_url, "is already crawled.")
 
     return uncrawled_news_urls_list
@@ -115,7 +115,7 @@ def insert_to_mysql(news_insertion_list):
                 INSERT INTO api_news(title, url, published_time, news_source, news_reporter, news_type, news_content) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s)"""
 
-    print(insert_query)
+    # print(insert_query)
 
     for news in news_insertion_list:
         try:
@@ -137,5 +137,11 @@ if __name__ == "__main__":
     print(news_urls_list)
     print("-----")
     news_to_crawl = check_uncrawled_news_urls(news_urls_list)
-    news_insertion_list = get_news_contents(news_to_crawl)
-    insert_to_mysql(news_insertion_list)
+    print("News to crawl:", news_to_crawl)
+    print(len(news_to_crawl))
+    if len(news_to_crawl) == 0:
+        print("There is no latest news at", datetime.now())
+    else:
+        news_insertion_list = get_news_contents(news_to_crawl)
+        insert_to_mysql(news_insertion_list)
+    print("crawler finished")
